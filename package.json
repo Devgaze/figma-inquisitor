@@ -1,0 +1,42 @@
+{
+  "name": "figma-inquisitor",
+  "version": "1.0.0",
+  "description": "Figma Inquisitor is a Figma local variable inspector, focused on identification of unused variables",
+  "main": "dist/code.js",
+  "scripts": {
+    "build": "concurrently 'npm:clean' 'npm:create-dist' 'npm:js' 'npm:html' 'npm:css' ",
+    "clean": "rm -rf dist",
+    "create-dist": "mkdir dist",
+    "css": "sass src:dist",
+    "css:watch": "npm run css -- -w ",
+    "js": "tsc -p tsconfig.json",
+    "js:watch": "npm run js -- --watch",
+    "html": "copyfiles -f src/ui.html dist",
+    "html:watch": "onchange 'src/**/*.html' -v -- npm run html",
+    "watch": "concurrently 'npm:build' 'npm:js:watch' 'npm:html:watch' 'npm:css:watch'",
+    "test": "jest",
+    "lint": "tslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Devgaze/figma-inquisitor.git"
+  },
+  "keywords": [],
+  "author": "Devgaze",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Devgaze/figma-inquisitor/issues"
+  },
+  "homepage": "https://github.com/Devgaze/figma-inquisitor#readme",
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.83.0",
+    "concurrently": "^8.2.2",
+    "copyfiles": "^2.4.1",
+    "jest": "^29.7.0",
+    "onchange": "^7.1.0",
+    "rimraf": "^5.0.5",
+    "sass": "^1.69.7",
+    "tslint": "^6.1.3",
+    "typescript": "^5.3.3"
+  }
+}
