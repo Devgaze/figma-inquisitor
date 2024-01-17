@@ -1,24 +1,24 @@
-<link rel="stylesheet" href="./styles.css" />
-<div id="inquisitor-wrapper"></div>
-
-<script>
-  (function () {
-    const wrapper = document.getElementById('inquisitor-wrapper');
-
-    onmessage = (event) => {
-      type = event.data.pluginMessage.type;
-
-      if (type === 'uiDataReady') {
-        renderData(wrapper);
-        return;
-      }
-    };
-  })();
-
-  function renderData(parentElement) {
-    const p = document.createElement('p');
-    p.innerText = 'The Inquisitor is loaded...';
-    // p.style.accentColor = red;
-    parentElement.appendChild(p);
-  }
-</script>
+<div id="inquisitor-wrapper">
+  <div id="info-panel">
+    <h3>Selection information</h3>
+    <div id="info-panel-body"></div>
+  </div>
+  <div id="filter-wrapper">
+    <p>Filter table</p>
+    <select name="filter" id="filter"></select>
+  </div>
+  <table id="variable-listing">
+    <thead>
+      <tr>
+        <th class="var-name">variable</th>
+        <th class="var-flag">Used in selection</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+        <td>No variables found.</td>
+      </tr>
+    </tfoot>
+    <tbody></tbody>
+  </table>
+</div>
