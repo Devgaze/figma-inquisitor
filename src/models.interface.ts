@@ -1,3 +1,5 @@
+import { EventMessages } from './events.enum';
+
 export type InqVariableCollection = {
   id: string;
   name: string;
@@ -19,4 +21,17 @@ export type InqFigmaData = {
 export const notificationOptions: NotificationOptions = {
   timeout: 5000,
   error: false,
+};
+
+export type InqNormalisedVariable = {
+  name: string;
+  id: string;
+};
+
+export type InqPostMessage = {
+  type: EventMessages;
+  collections: InqVariableCollection[];
+  localVariables: InqNormalisedVariable[];
+  unusedVariables: InqUnusedVariable[];
+  currentPageTitle: string;
 };

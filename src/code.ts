@@ -2,15 +2,17 @@ import { Inquisitor } from './inquisitor.class';
 import { InqVariableCollection, notificationOptions } from './models.interface';
 import { EventMessages } from './events.enum';
 
-figma.showUI(__html__, {
-  width: 600,
-  height: 600,
-  title: 'The Inquisitor - local variable inspector',
-});
+(() => {
+  figma.showUI(__html__, {
+    width: 600,
+    height: 600,
+    title: 'The Inquisitor - local variable inspector',
+  });
 
-figma.skipInvisibleInstanceChildren = true;
-figma.on('run', run);
-figma.on('selectionchange', selectionHasChanged);
+  figma.skipInvisibleInstanceChildren = true;
+  figma.on('run', run);
+  figma.on('selectionchange', selectionHasChanged);
+})();
 
 function run() {
   const localVariables = figma.variables.getLocalVariables();

@@ -1,80 +1,91 @@
-import { InqUnusedVariable, InqVariableCollection } from './models.interface';
+import {
+  InqNormalisedVariable,
+  InqPostMessage,
+  InqUnusedVariable,
+  InqVariableCollection,
+} from './models.interface';
 import './styles.scss';
 import { EventMessages } from './events.enum';
-(function () {
-  // DOM elements
-  const infoPanel = document.getElementById('info-panel');
-  const filter = document.getElementById('filter');
-  const variableListingBody = document.getElementsByTagName('tbody')[0];
-  const variableListingFooter = document.getElementsByTagName('tfoot')[0];
 
-  let selectedCollection: string | undefined;
-  let unusedVariables: InqUnusedVariable[];
-  let localVariables: Variable[];
-  let collections: VariableCollection[];
-  let currentPageTitle: string;
-  let executionTimeInMs: number;
-  let countOfSelectedNodes: number;
-  let filterEventListener = undefined;
+// DOM elements
+const inquisitorWrapper = document.getElementById('inquisitor-wrapper');
+const filterWrapper = document.getElementById('filter-wrapper');
+const filter = document.getElementById('filter');
+const variableListing = document.getElementById('variable-listing');
+const variableListingBody = document.getElementsByTagName('tbody')[0];
 
-  onmessage = (event) => {
-    const data = event.data.pluginMessage;
-    const messageType: EventMessages = data.type;
+let selectedCollection: string | undefined = '';
+let unusedVariables: InqUnusedVariable[] = [];
+let localVariables: InqNormalisedVariable[] = [];
+let collections: InqVariableCollection[] = [];
+let currentPageTitle: string = '';
 
-    if (messageType === EventMessages.FIGMA_PLUGIN_STARTED) {
-      localVariables = data.localVariables;
-      collections = data.collections;
-      currentPageTitle = data.currentPageTitle;
-      unusedVariables = data.unusedVariables;
+onmessage = (event) => {
+  const data = event.data.pluginMessage;
+  setVariables(data);
+  buildUI();
+};
 
-      // render filter control
-      if (filter && variableListingFooter) {
-        filterEventListener = filter.addEventListener('change', (e: any) =>
-          renderResults(
-            unusedVariables,
-            localVariables,
-            collections,
-            variableListingBody,
-            variableListingFooter,
-            e.target.value
-          )
-        );
-        selectedCollection = renderFilterControl(collections, currentPageTitle, filter);
-      }
+function setVariables(data: InqPostMessage) {
+  const messageType: EventMessages = data.type;
 
-      // render results
-      if (variableListingBody && variableListingFooter) {
-        renderResults(
-          unusedVariables,
-          localVariables,
-          collections,
-          variableListingBody,
-          variableListingFooter,
-          selectedCollection ? selectedCollection : ''
-        );
-      }
-    } else if (messageType === EventMessages.FIGMA_DATA_READY) {
-      unusedVariables = data.unusedVariables;
+  if (messageType === EventMessages.FIGMA_PLUGIN_STARTED) {
+    localVariables = data.localVariables;
+    collections = data.collections;
+    currentPageTitle = data.currentPageTitle;
+    unusedVariables = data.unusedVariables;
+  }
 
-      // render results
-      if (variableListingBody && variableListingFooter) {
-        renderResults(
-          unusedVariables,
-          localVariables,
-          collections,
-          variableListingBody,
-          variableListingFooter,
-          selectedCollection ? selectedCollection : ''
-        );
-      }
-    } else if (messageType === EventMessages.FIGMA_SELECTION_CHANGED) {
-      console.info('>>>>>>> FIGMA_SELECTION_CHANGED <<<<<<');
-    }
-  };
-})();
+  if (messageType === EventMessages.FIGMA_DATA_READY) {
+    unusedVariables = data.unusedVariables;
+  }
+}
+
+function buildUI() {
+  if (!variableListing || !filter) {
+    return;
+  }
+
+  if (!localVariables.length) {
+    renderNoVariableView();
+    return;
+  }
+  // render filter control
+  filter.onchange = filterResults;
+  selectedCollection = renderFilterControl(collections, currentPageTitle, filter);
+
+  // render results
+  renderResults(
+    unusedVariables,
+    localVariables,
+    collections,
+    selectedCollection ? selectedCollection : ''
+  );
+
+  variableListing.style.display = 'table';
+}
+
+function renderNoVariableView() {
+  if (!variableListing || !filterWrapper || !inquisitorWrapper) {
+    return;
+  }
+  variableListing.style.display = 'none';
+  filterWrapper.style.display = 'none';
+  inquisitorWrapper.className = 'centerScreen';
+}
+
+function filterResults(e: Event) {
+  selectedCollection = e.target ? (e.target as HTMLSelectElement).value : '';
+  renderResults(
+    unusedVariables,
+    localVariables,
+    collections,
+    selectedCollection ? selectedCollection : ''
+  );
+}
 
 function renderFilterControl(
-  collections: VariableCollection[],
+  collections: InqVariableCollection[],
   currentPageTitle: string,
   parentElement: HTMLElement
 ): string | undefined {
@@ -105,28 +116,24 @@ function renderFilterControl(
 
 function renderResults(
   unused: InqUnusedVariable[],
-  vars: Variable[],
+  vars: InqNormalisedVariable[],
   collections: InqVariableCollection[],
-  tbodyEl: HTMLElement,
-  tfootEl: HTMLElement,
   collectionId: string
 ) {
-  let col = [...collections];
+  variableListingBody.innerHTML = '';
 
-  tbodyEl.innerHTML = '';
-  console.info(collectionId);
-  let c = collectionId
+  const c = collectionId
     ? [...collections].filter((collection) => collection.id === collectionId)
     : [...collections];
 
-  renderCollections(c, vars, unused, tbodyEl);
+  renderCollections(c, vars, unused, variableListingBody);
 }
 
 function renderCollections(
   collections: InqVariableCollection[],
-  variables: Variable[],
+  variables: InqNormalisedVariable[],
   unusedVars: InqUnusedVariable[],
-  tbodyEl: HTMLElement
+  variableListingBody: HTMLElement
 ) {
   collections.forEach((collection: InqVariableCollection) => {
     const collectionRow = document.createElement('tr');
@@ -137,20 +144,20 @@ function renderCollections(
     collectionCol.innerText = collection.name;
 
     collectionRow.appendChild(collectionCol);
-    tbodyEl.appendChild(collectionRow);
+    variableListingBody.appendChild(collectionRow);
 
-    renderVariables(collection.variableIds, variables, unusedVars, tbodyEl);
+    renderVariables(collection.variableIds, variables, unusedVars, variableListingBody);
   });
 }
 
 function renderVariables(
   variableIds: string[],
-  variables: Variable[],
+  variables: InqNormalisedVariable[],
   unusedVars: InqUnusedVariable[],
-  tbodyEl: HTMLElement
+  variableListingBody: HTMLElement
 ) {
   variableIds.forEach((vid: string, idx: number) => {
-    const variable = variables.filter((v: any) => v.id === vid)[0];
+    const variable = variables.filter((v: InqNormalisedVariable) => v.id === vid)[0];
     if (variable) {
       const variableRow = document.createElement('tr');
       const variableIndexCol = document.createElement('td');
@@ -164,13 +171,15 @@ function renderVariables(
 
       const variableIsUsedCol = document.createElement('td');
       if (unusedVars) {
-        variableIsUsedCol.innerText = unusedVars.some((a, i) => a.id === vid) ? '—' : 'Yes';
+        variableIsUsedCol.innerText = unusedVars.some((a: InqUnusedVariable) => a.id === vid)
+          ? '—'
+          : 'Yes';
       } else {
         variableIsUsedCol.innerText = '—';
       }
       variableRow.appendChild(variableIsUsedCol);
 
-      tbodyEl.appendChild(variableRow);
+      variableListingBody.appendChild(variableRow);
     }
   });
 }
