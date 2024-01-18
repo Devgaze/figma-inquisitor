@@ -1,6 +1,6 @@
 import { InqUnusedVariable, InqVariableCollection } from './models.interface';
 import './styles.scss';
-import { EventMessages } from './value.const';
+import { EventMessages } from './events.enum';
 (function () {
   // DOM elements
   const infoPanel = document.getElementById('info-panel');
@@ -17,32 +17,15 @@ import { EventMessages } from './value.const';
   let countOfSelectedNodes: number;
   let filterEventListener = undefined;
 
-  // flags
-  let showInfoPanel = true;
-
   onmessage = (event) => {
     const data = event.data.pluginMessage;
     const messageType: EventMessages = data.type;
 
-    if (messageType === EventMessages.FIGMA_DATA_READY) {
-      // const { localVariables, collections, unusedVariablesInfo, currentPageTitle } = data;
-      // const { unusedVariables, executionTimeInMs, countOfSelectedNodes } = unusedVariablesInfo;
+    if (messageType === EventMessages.FIGMA_PLUGIN_STARTED) {
       localVariables = data.localVariables;
       collections = data.collections;
       currentPageTitle = data.currentPageTitle;
-      unusedVariables = data.unusedVariablesInfo.unusedVariables;
-      executionTimeInMs = data.unusedVariablesInfo.executionTimeInMs;
-      countOfSelectedNodes = data.unusedVariablesInfo.countOfSelectedNodes;
-
-      // render info panel
-      if (infoPanel) {
-        if (showInfoPanel) {
-          renderSelectionInformation(executionTimeInMs, countOfSelectedNodes, infoPanel);
-          infoPanel.style.display = 'block';
-        } else {
-          infoPanel.style.display = 'block';
-        }
-      }
+      unusedVariables = data.unusedVariables;
 
       // render filter control
       if (filter && variableListingFooter) {
@@ -70,27 +53,25 @@ import { EventMessages } from './value.const';
           selectedCollection ? selectedCollection : ''
         );
       }
+    } else if (messageType === EventMessages.FIGMA_DATA_READY) {
+      unusedVariables = data.unusedVariables;
 
-      return;
+      // render results
+      if (variableListingBody && variableListingFooter) {
+        renderResults(
+          unusedVariables,
+          localVariables,
+          collections,
+          variableListingBody,
+          variableListingFooter,
+          selectedCollection ? selectedCollection : ''
+        );
+      }
+    } else if (messageType === EventMessages.FIGMA_SELECTION_CHANGED) {
+      console.info('>>>>>>> FIGMA_SELECTION_CHANGED <<<<<<');
     }
   };
 })();
-
-function renderSelectionInformation(
-  executionTimeInMs: number,
-  countOfSelectedNodes: number,
-  parentElement: HTMLElement
-) {
-  const seconds = executionTimeInMs / 1000;
-  const nodeCount = new Intl.NumberFormat('en-uk', { maximumSignificantDigits: 3 }).format(
-    countOfSelectedNodes
-  );
-  const messageElement = document.createElement('p');
-  messageElement.innerText = `Processed ${nodeCount} elements in ${seconds} seconds.`;
-
-  parentElement.innerHTML = '';
-  parentElement.appendChild(messageElement);
-}
 
 function renderFilterControl(
   collections: VariableCollection[],
@@ -102,6 +83,7 @@ function renderFilterControl(
 
   const emptyOption = document.createElement('option');
   emptyOption.innerText = '--';
+  emptyOption.value = '';
   parentElement.appendChild(emptyOption);
 
   collections.forEach((collection: InqVariableCollection) => {
@@ -132,7 +114,7 @@ function renderResults(
   let col = [...collections];
 
   tbodyEl.innerHTML = '';
-
+  console.info(collectionId);
   let c = collectionId
     ? [...collections].filter((collection) => collection.id === collectionId)
     : [...collections];
@@ -147,15 +129,15 @@ function renderCollections(
   tbodyEl: HTMLElement
 ) {
   collections.forEach((collection: InqVariableCollection) => {
-    // const collectionRow = document.createElement('tr');
-    // const collectionCol = document.createElement('td');
+    const collectionRow = document.createElement('tr');
+    const collectionCol = document.createElement('td');
 
-    // collectionCol.setAttribute('colspan', '2');
-    // collectionCol.className = 'collection-row';
-    // collectionCol.innerText = collection.name;
+    collectionCol.setAttribute('colspan', '3');
+    collectionCol.className = 'collection-row';
+    collectionCol.innerText = collection.name;
 
-    // collectionRow.appendChild(collectionCol);
-    // tbodyEl.appendChild(collectionRow);
+    collectionRow.appendChild(collectionCol);
+    tbodyEl.appendChild(collectionRow);
 
     renderVariables(collection.variableIds, variables, unusedVars, tbodyEl);
   });
@@ -181,7 +163,11 @@ function renderVariables(
       variableRow.appendChild(variableLabelCol);
 
       const variableIsUsedCol = document.createElement('td');
-      variableIsUsedCol.innerText = unusedVars.some((a, i) => a.id === vid) ? '—' : 'Yes';
+      if (unusedVars) {
+        variableIsUsedCol.innerText = unusedVars.some((a, i) => a.id === vid) ? '—' : 'Yes';
+      } else {
+        variableIsUsedCol.innerText = '—';
+      }
       variableRow.appendChild(variableIsUsedCol);
 
       tbodyEl.appendChild(variableRow);

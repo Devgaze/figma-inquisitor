@@ -24,7 +24,7 @@ export class Inquisitor implements IInquisitor {
 
     const end = Date.now();
     this.executionTimeInMs = end - start;
-    console.clear();
+    // console.clear();
   }
 
   getFigmaData(): InqFigmaData {

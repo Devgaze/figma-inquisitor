@@ -15,3 +15,8 @@ export type InqFigmaData = {
   executionTimeInMs: number;
   countOfSelectedNodes: number;
 };
+
+export const notificationOptions: NotificationOptions = {
+  timeout: 5000,
+  error: false,
+};

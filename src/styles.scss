@@ -1,36 +1,41 @@
 $primary-color: black;
 $accent-color: rgba(0, 125, 200, 0.25);
+$fast-response-color: rgba(51, 243, 128, 0.5);
+$tolerable-response-color: rgba(255, 253, 126, 0.5);
+$think-again-response-color: rgba(255, 0, 212, 0.5);
 $accent-color-secondary: teal;
 $padding-horizontal: 1rem;
 $padding-vertical: 0;
 $border-radius: 0.3rem;
 $paragraph-margin: 0.5rem;
 
+body {
+  position: relative;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+
+  b,
+  strong,
+  th {
+    font-weight: 500;
+  }
+}
+
 #inquisitor-wrapper {
   width: 90%;
-  /* min-height: 100vh; */
   display: flex;
   flex-direction: column;
   align-items: stretch;
   margin-right: auto;
   margin-left: auto;
   padding: $padding-horizontal $padding-horizontal;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-
-  #info-panel {
-    background-color: $accent-color;
-    border: 1px solid $accent-color-secondary;
-    border-radius: $border-radius;
-    display: none;
-    padding: $padding-vertical $padding-horizontal;
-
-    p {
-      margin: $paragraph-margin 0;
-    }
-  }
 
   #filter-wrapper {
     margin-bottom: 2rem;
+
+    p {
+      margin-top: 0;
+    }
   }
 
   table {
@@ -46,10 +51,9 @@ $paragraph-margin: 0.5rem;
       display: none;
     }
     tbody tr:hover {
-      background-color: $accent-color;
-    }
-    tbody tr:hover td {
-      color: $primary-color;
+      td {
+        background-color: $accent-color;
+      }
     }
 
     th,
@@ -58,12 +62,12 @@ $paragraph-margin: 0.5rem;
       padding: 0 1rem;
     }
     th {
-      font-size: 1rem;
+      font-size: 0.8rem;
       color: #fff;
       line-height: 1.4;
       text-transform: uppercase;
       background-color: #002933;
-      padding: 1.5rem auto 1.25rem;
+      padding: 0.5rem 1rem;
       font-weight: unset;
     }
     td {
@@ -79,8 +83,7 @@ $paragraph-margin: 0.5rem;
       padding-top: 2rem;
     }
     .collection-row:hover {
-      background-color: $primary-color;
-      color: white;
+      background-color: transparent;
     }
 
     .var-name {
