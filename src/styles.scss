@@ -21,6 +21,14 @@ body {
   }
 }
 
+#background {
+  position: fixed;
+  bottom: -0.8rem;
+  right: -1rem;
+  // transform: rotate(20deg);
+  opacity: 0.3;
+}
+
 #inquisitor-wrapper {
   width: 90%;
   display: flex;

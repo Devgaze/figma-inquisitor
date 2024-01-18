@@ -82,7 +82,7 @@ function renderFilterControl(
   parentElement.innerHTML = '';
 
   const emptyOption = document.createElement('option');
-  emptyOption.innerText = '--';
+  emptyOption.innerText = '-- show all --';
   emptyOption.value = '';
   parentElement.appendChild(emptyOption);
 
