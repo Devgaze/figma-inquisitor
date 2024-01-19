@@ -1,3 +1,5 @@
+![The Inquisitor - Figma local variable inspector](docs/plugin-background.svg)
+
 # The Inquisitor
 
 "The Inquisitor" is the Figma plugin that helps you inspect local variables against the selected element(s) of currently loaded page.
